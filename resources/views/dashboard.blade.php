@@ -1663,46 +1663,71 @@
     .dash-filter-capsule {
         display: inline-flex;
         align-items: center;
-        gap: 0.42rem;
-        padding: 0.26rem 0.72rem 0.26rem 0.35rem;
+        gap: 0.48rem;
+        padding: 0.26rem 0.78rem 0.26rem 0.34rem;
         border-radius: 999px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(243, 232, 237, 0.45) 100%);
-        backdrop-filter: blur(14px) saturate(170%);
-        -webkit-backdrop-filter: blur(14px) saturate(170%);
-        border: 1.5px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(243, 232, 237, 0.56) 100%);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1.5px solid rgba(255, 255, 255, 0.96);
         box-shadow:
-            0 8px 18px -4px rgba(45, 55, 72, 0.14),
-            inset 0 2px 4px rgba(255, 255, 255, 0.96),
-            inset 0 -2px 4px rgba(255, 255, 255, 0.45);
-        transition: all 0.2s ease;
+            0 8px 18px -4px rgba(45, 55, 72, 0.13),
+            inset 0 2px 4px rgba(255, 255, 255, 0.98),
+            inset 0 -2px 4px rgba(255, 255, 255, 0.55);
+        transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .dash-filter-capsule:hover {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.86) 0%, rgba(243, 232, 237, 0.68) 100%);
+    .dash-filter-capsule:hover,
+    .dash-filter-capsule:focus-within {
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(224, 242, 254, 0.72) 100%);
+        border-color: #ffffff;
         box-shadow:
-            0 10px 22px -4px rgba(45, 55, 72, 0.18),
+            0 12px 24px -5px rgba(2, 132, 199, 0.18),
+            0 4px 10px rgba(45, 55, 72, 0.08),
             inset 0 2px 4px #ffffff;
     }
     .dash-filter-capsule-icon {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.74rem;
+        font-size: 0.76rem;
         flex-shrink: 0;
-        border: 1px solid rgba(255, 255, 255, 0.92);
-        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
+        background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+        border: 1.2px solid rgba(255, 255, 255, 0.96);
+        box-shadow:
+            0 3px 8px rgba(2, 132, 199, 0.16),
+            inset 0 1.5px 2px rgba(255, 255, 255, 0.98);
     }
-    .dash-filter-select {
-        border: none;
-        background: transparent;
+    .dash-filter-select,
+    .dash-filter-capsule-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        border: none !important;
+        background-color: transparent !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.15rem center;
+        background-size: 12px 12px;
         color: #1e293b;
-        font-size: 0.73rem;
+        font-size: 0.75rem;
         font-weight: 700;
-        outline: none;
+        letter-spacing: -0.01em;
+        outline: none !important;
+        box-shadow: none !important;
         cursor: pointer;
-        padding-right: 0.2rem;
+        padding: 0.12rem 1.25rem 0.12rem 0.1rem;
+        line-height: 1.3;
+    }
+    .dash-filter-select option,
+    .dash-filter-capsule-select option {
+        background: #ffffff;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 0.35rem 0.6rem;
     }
 </style>
 @endpush
@@ -3535,8 +3560,8 @@
                     </span>
 
                     {{-- Filtro por Planta --}}
-                    <div class="dash-filter-capsule" style="background: linear-gradient(135deg, rgba(224,242,254,0.62) 0%, rgba(255,255,255,0.65) 100%);">
-                        <span class="dash-filter-capsule-icon" style="color: #0284c7;">
+                    <div class="dash-filter-capsule" style="background: linear-gradient(135deg, rgba(224,242,254,0.72) 0%, rgba(255,255,255,0.88) 100%);">
+                        <span class="dash-filter-capsule-icon" style="background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%); color: #0284c7;">
                             <i class="bi bi-building"></i>
                         </span>
                         <select id="bdPlantFilter" class="dash-filter-capsule-select" onchange="filterBdTable()">
@@ -3544,6 +3569,11 @@
                             <option value="G1">Planta G1</option>
                             <option value="SA">Planta SA</option>
                             <option value="DF">Planta DF</option>
+                            <option value="GF">Planta GF</option>
+                            <option value="LS">Planta LS</option>
+                            <option value="G2">Planta G2</option>
+                            <option value="G3">Planta G3</option>
+                            <option value="MPC">Planta MPC</option>
                         </select>
                     </div>
 
