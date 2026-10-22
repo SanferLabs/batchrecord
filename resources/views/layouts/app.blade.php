@@ -1295,7 +1295,7 @@
             <div class="sidebar-brand">
                 <a href="{{ route('dashboard', ['section' => 'inicio']) }}" class="text-decoration-none d-inline-flex align-items-center justify-content-center w-100">
                     <img id="sidebarGrimannLogo"
-                         src="{{ asset('images/grimann logo.png') }}"
+                         src="{{ asset('images/Grimann logo.png') }}"
                          alt="Grimann"
                          class="sidebar-logo-white">
                     <span class="sidebar-slim-brand-badge" title="Grimann • Sanfer EBR">
