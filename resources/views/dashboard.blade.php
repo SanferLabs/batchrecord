@@ -1795,10 +1795,12 @@
                 @php
                     $authEmailKey = strtolower(trim((string) (Auth::user()->email ?? Auth::user()->name ?? 'guest')));
                     $matchedRoleIdx = null;
+                    $currentRoleLabel = 'Especialista BPF';
                     if (isset($roleUsers)) {
                         foreach ($roleUsers->values() as $rIdx => $rUser) {
                             if (strtolower(trim((string) $rUser->email)) === $authEmailKey || strtolower(trim((string) $rUser->name)) === $authEmailKey) {
                                 $matchedRoleIdx = $rIdx;
+                                $currentRoleLabel = $rUser->role ?: 'Administrador';
                                 break;
                             }
                         }
@@ -1806,51 +1808,149 @@
                     $userSceneVariant = $matchedRoleIdx !== null
                         ? ($matchedRoleIdx % 4)
                         : (abs(crc32($authEmailKey . '_' . (Auth::id() ?? 0))) % 4);
-                    $cloudMidColors = [
-                        0 => '#e0f2fe', // Perla Azul Cielo
-                        1 => '#F3E8ED', // Perla Rosado Suave
-                        2 => '#dcfce7', // Perla Verde Menta
-                        3 => '#ede9fe', // Perla Lavanda
+
+                    // Nombre corto en mayúsculas para la placa frontal 3D y el letrero personalizado
+                    $shortUserName = mb_strtoupper(trim((string) $userName));
+                    if (mb_strlen($shortUserName) > 22) {
+                        $nameParts = preg_split('/\s+/', $shortUserName);
+                        $shortUserName = implode(' ', array_slice($nameParts, 0, 2));
+                    }
+
+                    // Paletas 3D completamente distintivas por usuario
+                    $sceneThemes = [
+                        0 => [
+                            'cloud'        => '#bae6fd',
+                            'glow'         => '#0284c7',
+                            'podiumTint'   => '#e0f2fe',
+                            'tank1Top'     => '#bae6fd',
+                            'tank1Mid'     => '#38bdf8',
+                            'tank1Bot'     => '#0369a1',
+                            'tank2Top'     => '#ddd6fe',
+                            'tank2Mid'     => '#a78bfa',
+                            'tank2Bot'     => '#5b21b6',
+                            'signBg1'      => '#0f172a',
+                            'signBg2'      => '#1e3a8a',
+                            'signBorder'   => '#38bdf8',
+                            'signSubText'  => '#7dd3fc',
+                            'facadeMid'    => '#dbeafe',
+                            'facadeBot'    => '#3b82f6',
+                            'sideTop'      => '#2563eb',
+                            'sideBot'      => '#1e3a8a',
+                            'badgeColor'   => '#0284c7',
+                            'dotColor'     => '#38bdf8',
+                            'stationTitle' => 'AUTOMATIZACIÓN IA',
+                            'unitLabel'    => 'UNIDAD CENTRAL • AUTOMATIZACIÓN',
+                        ],
+                        1 => [
+                            'cloud'        => '#fbcfe8',
+                            'glow'         => '#db2777',
+                            'podiumTint'   => '#fce7f3',
+                            'tank1Top'     => '#fbcfe8',
+                            'tank1Mid'     => '#f472b6',
+                            'tank1Bot'     => '#be185d',
+                            'tank2Top'     => '#a7f3d0',
+                            'tank2Mid'     => '#34d399',
+                            'tank2Bot'     => '#047857',
+                            'signBg1'      => '#4a044e',
+                            'signBg2'      => '#831843',
+                            'signBorder'   => '#f472b6',
+                            'signSubText'  => '#fbcfe8',
+                            'facadeMid'    => '#fce7f3',
+                            'facadeBot'    => '#9d174d',
+                            'sideTop'      => '#be185d',
+                            'sideBot'      => '#500724',
+                            'badgeColor'   => '#be185d',
+                            'dotColor'     => '#ec4899',
+                            'stationTitle' => 'LIBERACIÓN EJECUTIVA',
+                            'unitLabel'    => 'DIRECCIÓN CALIDAD • GEL Y DERMO',
+                        ],
+                        2 => [
+                            'cloud'        => '#fde68a',
+                            'glow'         => '#d97706',
+                            'podiumTint'   => '#fef3c7',
+                            'tank1Top'     => '#fef08a',
+                            'tank1Mid'     => '#fbbf24',
+                            'tank1Bot'     => '#b45309',
+                            'tank2Top'     => '#99f6e4',
+                            'tank2Mid'     => '#2dd4bf',
+                            'tank2Bot'     => '#0f766e',
+                            'signBg1'      => '#451a03',
+                            'signBg2'      => '#78350f',
+                            'signBorder'   => '#fbbf24',
+                            'signSubText'  => '#fde68a',
+                            'facadeMid'    => '#fef3c7',
+                            'facadeBot'    => '#b45309',
+                            'sideTop'      => '#d97706',
+                            'sideBot'      => '#451a03',
+                            'badgeColor'   => '#b45309',
+                            'dotColor'     => '#f59e0b',
+                            'stationTitle' => 'SÓLIDOS Y TABLETAS',
+                            'unitLabel'    => 'PLANTA SÓLIDOS • CONTROL BPF',
+                        ],
+                        3 => [
+                            'cloud'        => '#ddd6fe',
+                            'glow'         => '#7c3aed',
+                            'podiumTint'   => '#ede9fe',
+                            'tank1Top'     => '#e9d5ff',
+                            'tank1Mid'     => '#c084fc',
+                            'tank1Bot'     => '#6b21a8',
+                            'tank2Top'     => '#fecdd3',
+                            'tank2Mid'     => '#fb7185',
+                            'tank2Bot'     => '#be123c',
+                            'signBg1'      => '#2e1065',
+                            'signBg2'      => '#4c1d95',
+                            'signBorder'   => '#c084fc',
+                            'signSubText'  => '#e9d5ff',
+                            'facadeMid'    => '#ede9fe',
+                            'facadeBot'    => '#6d28d9',
+                            'sideTop'      => '#7c3aed',
+                            'sideBot'      => '#2e1065',
+                            'badgeColor'   => '#6d28d9',
+                            'dotColor'     => '#a855f7',
+                            'stationTitle' => 'BIOTECNOLOGÍA GMP',
+                            'unitLabel'    => 'LABORATORIO BIO • MICROBIOLOGÍA',
+                        ],
                     ];
-                    $cloudMidTone = $cloudMidColors[$userSceneVariant] ?? '#F3E8ED';
+                    $uTheme = $sceneThemes[$userSceneVariant] ?? $sceneThemes[1];
+                    $cloudMidTone = $uTheme['cloud'];
                 @endphp
                 <div class="stage-diorama-wrap">
                     <svg class="stage-diorama-svg" viewBox="0 0 560 420" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            {{-- Resplandor de piso debajo del podio --}}
+                            {{-- Resplandor de piso debajo del podio personalizado por usuario --}}
                             <radialGradient id="floorGlow" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#2d3748" stop-opacity="0.38"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['glow'] }}" stop-opacity="0.34"/>
                                 <stop offset="55%" stop-color="#666F88" stop-opacity="0.16"/>
-                                <stop offset="100%" stop-color="#cfe2f3" stop-opacity="0"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['podiumTint'] }}" stop-opacity="0"/>
                             </radialGradient>
 
                             {{-- Gradientes Metálicos / Cristal del Podio Circular Doble --}}
                             <linearGradient id="podiumOuterSide" x1="55" y1="335" x2="505" y2="335" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stop-color="#2d3748"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['signBg1'] }}"/>
                                 <stop offset="22%" stop-color="#788199"/>
                                 <stop offset="48%" stop-color="#f8fafc"/>
-                                <stop offset="74%" stop-color="#565f75"/>
-                                <stop offset="100%" stop-color="#1e293b"/>
+                                <stop offset="74%" stop-color="{{ $uTheme['sideTop'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['signBg1'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="podiumOuterTop" x1="75" y1="285" x2="485" y2="370" gradientUnits="userSpaceOnUse">
                                 <stop offset="0%" stop-color="#ffffff"/>
-                                <stop offset="38%" stop-color="#e2e8f0"/>
+                                <stop offset="38%" stop-color="{{ $uTheme['podiumTint'] }}"/>
                                 <stop offset="72%" stop-color="#94a3b8"/>
                                 <stop offset="100%" stop-color="#475569"/>
                             </linearGradient>
 
                             <linearGradient id="podiumInnerSide" x1="90" y1="308" x2="470" y2="308" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stop-color="#1e293b"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['signBg1'] }}"/>
                                 <stop offset="25%" stop-color="#666F88"/>
                                 <stop offset="52%" stop-color="#f1f5f9"/>
-                                <stop offset="78%" stop-color="#4a5568"/>
-                                <stop offset="100%" stop-color="#2d3748"/>
+                                <stop offset="78%" stop-color="{{ $uTheme['sideTop'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['signBg1'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="podiumInnerTop" x1="105" y1="260" x2="455" y2="340" gradientUnits="userSpaceOnUse">
                                 <stop offset="0%" stop-color="#ffffff"/>
-                                <stop offset="45%" stop-color="#F3E8ED"/>
+                                <stop offset="45%" stop-color="{{ $uTheme['podiumTint'] }}"/>
                                 <stop offset="80%" stop-color="#cfe2f3"/>
                                 <stop offset="100%" stop-color="#788199"/>
                             </linearGradient>
@@ -1865,40 +1965,40 @@
                             </linearGradient>
 
                             <linearGradient id="tankBlueGel" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#bae6fd"/>
-                                <stop offset="50%" stop-color="#7dd3fc"/>
-                                <stop offset="100%" stop-color="#0284c7"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['tank1Top'] }}"/>
+                                <stop offset="50%" stop-color="{{ $uTheme['tank1Mid'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['tank1Bot'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="tankMintGel" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#dcfce7"/>
-                                <stop offset="50%" stop-color="#86efac"/>
-                                <stop offset="100%" stop-color="#15803d"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['tank2Top'] }}"/>
+                                <stop offset="50%" stop-color="{{ $uTheme['tank2Mid'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['tank2Bot'] }}"/>
                             </linearGradient>
 
                             {{-- Gradientes para la Nave / Planta Farmacéutica Central --}}
                             <linearGradient id="plantFacadeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#f8fafc"/>
-                                <stop offset="45%" stop-color="#cfe2f3"/>
-                                <stop offset="100%" stop-color="#666F88"/>
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="50%" stop-color="{{ $uTheme['facadeMid'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['facadeBot'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="plantSideGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#666F88"/>
-                                <stop offset="55%" stop-color="#334155"/>
-                                <stop offset="100%" stop-color="#1e293b"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['sideTop'] }}"/>
+                                <stop offset="55%" stop-color="{{ $uTheme['signBg2'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['sideBot'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="batchSignGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#1e293b"/>
-                                <stop offset="50%" stop-color="#2d3748"/>
-                                <stop offset="100%" stop-color="#4a5568"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['signBg1'] }}"/>
+                                <stop offset="55%" stop-color="{{ $uTheme['signBg2'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['sideTop'] }}"/>
                             </linearGradient>
 
                             <linearGradient id="conveyorBeltGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#1e293b"/>
-                                <stop offset="50%" stop-color="#334155"/>
-                                <stop offset="100%" stop-color="#1e293b"/>
+                                <stop offset="0%" stop-color="{{ $uTheme['signBg1'] }}"/>
+                                <stop offset="50%" stop-color="{{ $uTheme['signBg2'] }}"/>
+                                <stop offset="100%" stop-color="{{ $uTheme['signBg1'] }}"/>
                             </linearGradient>
 
                             {{-- Gradiente 3D Perla/Metálico para las Nubes Flotantes --}}
@@ -1986,27 +2086,69 @@
                             {{-- Techo Industrial con Unidades HVAC de Cuarto Limpio --}}
                             <polygon points="246,118 392,104 434,124 288,136" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
 
-                            {{-- LETRERO LUMINOSO 3D SUPERIOR: "BATCH RECORD" --}}
+                            {{-- LETRERO LUMINOSO 3D SUPERIOR PERSONALIZADO POR USUARIO --}}
                             <rect x="252" y="64" width="168" height="38" rx="12" fill="url(#batchSignGrad)" stroke="#ffffff" stroke-width="2"/>
-                            <rect x="256" y="68" width="160" height="30" rx="9" fill="none" stroke="rgba(186,230,253,0.45)" stroke-width="1"/>
+                            <rect x="256" y="68" width="160" height="30" rx="9" fill="none" stroke="{{ $uTheme['signBorder'] }}" stroke-opacity="0.75" stroke-width="1.2"/>
                             {{-- Soportes del letrero al techo de la planta --}}
                             <rect x="284" y="102" width="6" height="14" fill="#475569"/>
                             <rect x="378" y="96" width="6" height="14" fill="#475569"/>
-                            {{-- Texto principal: BATCH RECORD --}}
+                            {{-- Texto principal: BATCH RECORD + Unidad Distintiva del Usuario --}}
                             <text x="336" y="83" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="900" letter-spacing="1.4" font-family="Inter, system-ui, sans-serif">BATCH RECORD</text>
-                            <text x="336" y="93.5" text-anchor="middle" fill="#bae6fd" font-size="6.2" font-weight="700" letter-spacing="1.2" font-family="Inter, system-ui, sans-serif">PLANTA FARMACÉUTICA • BPF / GMP</text>
+                            <text x="336" y="93.5" text-anchor="middle" fill="{{ $uTheme['signSubText'] }}" font-size="5.8" font-weight="800" letter-spacing="1.0" font-family="Inter, system-ui, sans-serif">{{ $uTheme['unitLabel'] }}</text>
+
+                            {{-- ESCULTURA / EMBLEMA 3D EXCLUSIVO POR USUARIO SOBRE LA NAVE Y EL PODIO --}}
+                            @if($userSceneVariant === 0)
+                                {{-- Distintivo Usuario 0 (chatboteams): Orbe Holográfico IA + Antena Satelital en Techo --}}
+                                <g class="stage-cloud-anim-1">
+                                    <circle cx="336" cy="40" r="15" fill="rgba(56,189,248,0.18)" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="3 2"/>
+                                    <circle cx="336" cy="40" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                                    <text x="336" y="43" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="900" font-family="Inter, sans-serif">AI</text>
+                                </g>
+                            @elseif($userSceneVariant === 1)
+                                {{-- Distintivo Usuario 1 (Brenda Campos): Insignia Estrella/Corona Ejecutiva 3D + Microscopio GMP --}}
+                                <g class="stage-cloud-anim-1">
+                                    <circle cx="336" cy="39" r="16" fill="rgba(244,114,182,0.22)" stroke="#f472b6" stroke-width="1.5"/>
+                                    <polygon points="336,25 339.5,34 349,34 341.5,39.5 344.5,48.5 336,43 327.5,48.5 330.5,39.5 323,34 332.5,34" fill="#fbbf24" stroke="#ffffff" stroke-width="1.2"/>
+                                </g>
+                                {{-- Microscopio / Torre Analítica de Liberación a la derecha de la nave --}}
+                                <g transform="translate(438, 224)">
+                                    <rect x="0" y="42" width="28" height="8" rx="4" fill="#831843" stroke="#ffffff" stroke-width="1.2"/>
+                                    <path d="M18 42 C24 30, 24 16, 14 10" stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                                    <rect x="6" y="6" width="8" height="18" rx="3" transform="rotate(-20 10 15)" fill="#f472b6" stroke="#ffffff" stroke-width="1.2"/>
+                                    <rect x="4" y="28" width="14" height="3.5" rx="1.5" fill="#38bdf8"/>
+                                    <circle cx="18" cy="24" r="4" fill="#fbbf24" stroke="#ffffff" stroke-width="1"/>
+                                </g>
+                            @elseif($userSceneVariant === 2)
+                                {{-- Distintivo Usuario 2: Engranaje Dorado 3D + Serpentín de Destilación --}}
+                                <g class="stage-cloud-anim-1">
+                                    <circle cx="336" cy="39" r="15" fill="rgba(251,191,36,0.22)" stroke="#fbbf24" stroke-width="1.5"/>
+                                    <circle cx="336" cy="39" r="9" fill="#d97706" stroke="#ffffff" stroke-width="1.5"/>
+                                    <circle cx="336" cy="39" r="3.5" fill="#fef3c7"/>
+                                </g>
+                            @else
+                                {{-- Distintivo Usuario 3: Molécula / Hélice Biotecnológica 3D Flotante --}}
+                                <g class="stage-cloud-anim-1">
+                                    <line x1="324" y1="34" x2="348" y2="44" stroke="#c084fc" stroke-width="2.2"/>
+                                    <line x1="324" y1="44" x2="348" y2="34" stroke="#fb7185" stroke-width="2.2"/>
+                                    <circle cx="324" cy="34" r="5" fill="#a855f7" stroke="#ffffff" stroke-width="1.2"/>
+                                    <circle cx="348" cy="44" r="5" fill="#a855f7" stroke="#ffffff" stroke-width="1.2"/>
+                                    <circle cx="336" cy="39" r="6" fill="#f43f5e" stroke="#ffffff" stroke-width="1.4"/>
+                                    <circle cx="324" cy="44" r="4.5" fill="#fb7185" stroke="#ffffff" stroke-width="1.2"/>
+                                    <circle cx="348" cy="34" r="4.5" fill="#fb7185" stroke="#ffffff" stroke-width="1.2"/>
+                                </g>
+                            @endif
 
                             {{-- Ventanales de Cristal de Laboratorio / Cuarto Limpio (2 Niveles) --}}
-                            <rect x="260" y="132" width="118" height="34" rx="6" fill="rgba(255,255,255,0.78)" stroke="#ffffff" stroke-width="1.2"/>
+                            <rect x="260" y="132" width="118" height="34" rx="6" fill="rgba(255,255,255,0.82)" stroke="#ffffff" stroke-width="1.2"/>
                             <line x1="298" y1="132" x2="298" y2="166" stroke="#cbd5e1" stroke-width="1.2"/>
                             <line x1="338" y1="132" x2="338" y2="166" stroke="#cbd5e1" stroke-width="1.2"/>
 
-                            {{-- Panel de Monitoreo de 7 Etapas en la Fachada --}}
-                            <rect x="260" y="174" width="118" height="28" rx="6" fill="rgba(45,55,72,0.88)" stroke="#ffffff" stroke-width="1"/>
-                            <circle cx="272" cy="188" r="4" fill="#38bdf8"/>
-                            <circle cx="285" cy="188" r="4" fill="#fbbf24"/>
-                            <circle cx="298" cy="188" r="4" fill="#4ade80"/>
-                            <text x="342" y="190.5" text-anchor="middle" fill="#f8fafc" font-size="7" font-weight="800" font-family="Inter, sans-serif">7 ETAPAS • 14 PÁGS.</text>
+                            {{-- Panel de Monitoreo en la Fachada personalizado por usuario --}}
+                            <rect x="260" y="174" width="118" height="28" rx="6" fill="{{ $uTheme['signBg1'] }}" stroke="#ffffff" stroke-width="1.2"/>
+                            <circle cx="271" cy="188" r="3.8" fill="{{ $uTheme['dotColor'] }}"/>
+                            <circle cx="282" cy="188" r="3.8" fill="#fbbf24"/>
+                            <circle cx="293" cy="188" r="3.8" fill="#4ade80"/>
+                            <text x="338" y="190.5" text-anchor="middle" fill="#ffffff" font-size="6.2" font-weight="800" font-family="Inter, sans-serif">{{ $uTheme['stationTitle'] }}</text>
 
                             {{-- Líneas luminosas en el lateral derecho del edificio --}}
                             @for($s = 0; $s < 6; $s++)
@@ -2201,10 +2343,10 @@
                                 <circle cx="{{ 150 + ($rol * 34) }}" cy="286" r="2" fill="#2d3748"/>
                             @endfor
 
-                            {{-- Placa Frontal de Cristal sobre el Podio: "LÍNEA DE PRODUCCIÓN • BATCH RECORD" --}}
-                            <rect x="195" y="302" width="170" height="20" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
-                            <circle cx="208" cy="312" r="4" fill="#22c55e"/>
-                            <text x="285" y="314.8" text-anchor="middle" fill="#1e293b" font-size="7.2" font-weight="900" letter-spacing="0.8" font-family="Inter, sans-serif">LÍNEA ACTIVA • BATCH RECORD</text>
+                            {{-- Placa Frontal de Cristal sobre el Podio con el Nombre y Rol del Usuario --}}
+                            <rect x="172" y="301" width="216" height="22" rx="11" fill="#ffffff" stroke="{{ $uTheme['signBorder'] }}" stroke-width="1.5"/>
+                            <circle cx="186" cy="312" r="4.5" fill="{{ $uTheme['dotColor'] }}"/>
+                            <text x="285" y="314.8" text-anchor="middle" fill="{{ $uTheme['signBg1'] }}" font-size="6.8" font-weight="900" letter-spacing="0.6" font-family="Inter, sans-serif">{{ $shortUserName }} • {{ mb_strtoupper($currentRoleLabel) }}</text>
                         </g>
 
                         {{-- 6. NUBES 3D METÁLICO-PERLA FLOTANTES (DIFERENTES POR USUARIO) --}}
