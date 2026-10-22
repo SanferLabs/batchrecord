@@ -13,10 +13,21 @@ class BatchRecordController extends Controller
 {
     /**
      * Legacy seed method disabled so only real OPs from dbo.FSO are used.
+     * Also removes the 10 legacy demo records if present on any environment.
      */
     protected function ensureSeedOrdersExist(): void
     {
-        // Deshabilitado: las Órdenes de Producción provienen únicamente de dbo.FSO
+        try {
+            BatchRecord::whereIn('orden_produccion', [
+                'OP-1', 'OP-71600', 'OP-71650', 'OP-71800', 'OP-72100',
+                'OP-72250', 'OP-72310', 'OP-72480', 'OP-72590', 'OP-72650',
+            ])->whereIn('lote', [
+                'G082301', 'B26008', 'L-71650', 'S26114', 'V26302',
+                'E26045', 'D26180', 'P26092', 'N26410', 'L26501',
+            ])->delete();
+        } catch (\Throwable $e) {
+            // Ignore cleanup errors
+        }
     }
 
     /**
@@ -66,6 +77,7 @@ class BatchRecordController extends Controller
         }
 
         $cachePath = storage_path('app/fso_orders_cache.json');
+        $seedFallbackPath = database_path('fso_orders_seed.json');
         $fsoRows = null;
 
         if (is_file($cachePath) && (time() - filemtime($cachePath)) < 3600) {
@@ -90,20 +102,33 @@ class BatchRecordController extends Controller
                     ORDER BY NumeroOrden ASC
                 ");
 
-                $fsoRows = array_map(fn($r) => [
-                    'NumeroOrden'    => (string) $r->NumeroOrden,
-                    'Estatus'        => (string) $r->Estatus,
-                    'CodigoArticulo' => (string) $r->CodigoArticulo,
-                    'Descripcion'    => (string) $r->Descripcion,
-                    'Lote'           => (string) $r->Lote,
-                    'CantidadOrden'  => $r->CantidadOrden !== null ? (float) $r->CantidadOrden : 0.0,
-                    'Instalacion'    => (string) ($r->Instalacion ?: 'G1'),
-                ], $rawRows);
+                if (count($rawRows) > 0) {
+                    $fsoRows = array_map(fn($r) => [
+                        'NumeroOrden'    => (string) $r->NumeroOrden,
+                        'Estatus'        => (string) $r->Estatus,
+                        'CodigoArticulo' => (string) $r->CodigoArticulo,
+                        'Descripcion'    => (string) $r->Descripcion,
+                        'Lote'           => (string) $r->Lote,
+                        'CantidadOrden'  => $r->CantidadOrden !== null ? (float) $r->CantidadOrden : 0.0,
+                        'Instalacion'    => (string) ($r->Instalacion ?: 'G1'),
+                    ], $rawRows);
 
-                @file_put_contents($cachePath, json_encode($fsoRows, JSON_UNESCAPED_UNICODE));
+                    @file_put_contents($cachePath, json_encode($fsoRows, JSON_UNESCAPED_UNICODE));
+                }
             } catch (\Throwable $e) {
-                $fsoRows = [];
+                $fsoRows = null;
             }
+        }
+
+        if ((empty($fsoRows) || !is_array($fsoRows)) && is_file($seedFallbackPath)) {
+            $decodedSeed = json_decode((string) file_get_contents($seedFallbackPath), true);
+            if (is_array($decodedSeed) && count($decodedSeed) > 0) {
+                $fsoRows = $decodedSeed;
+            }
+        }
+
+        if (!is_array($fsoRows)) {
+            $fsoRows = [];
         }
 
         // Map existing BatchRecord rows by normalized OP number
